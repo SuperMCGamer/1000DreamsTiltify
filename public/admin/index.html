@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Friday the Herteenth – Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <div class="admin-wrap">
+
+    <header class="admin-header">
+      <h1 class="admin-title">Friday the Herteenth</h1>
+      <p class="admin-sub">Donation Dashboard</p>
+      <div class="admin-total-wrap">
+        <span class="admin-total-label">Total raised</span>
+        <span class="admin-total" id="admin-total">$0</span>
+      </div>
+    </header>
+
+    <!-- Live donations list – newest at the top -->
+    <section class="donations-section">
+      <div class="donations-header">
+        <span>Donor</span>
+        <span>Amount</span>
+        <span>Time</span>
+        <span>Read</span>
+      </div>
+
+      <div id="donations-list">
+        <!-- Rows are injected by admin.js -->
+        <p class="empty-msg" id="empty-msg">Waiting for donations…</p>
+      </div>
+    </section>
+
+    <!-- ── Hidden developer panel ──────────────────────────────────────────
+         Reached by clicking the "Advanced" button at the bottom of the page.
+         Simulates a donation through the full alert queue.
+    ───────────────────────────────────────────────────────────────────────── -->
+    <div class="dev-area">
+      <button class="dev-toggle-btn" id="advanced-btn">Advanced ▾</button>
+
+      <div class="dev-panel" id="dev-panel">
+        <h3 class="dev-title">Simulate Donation</h3>
+        <div class="dev-fields">
+          <input
+            type="text"
+            id="sim-username"
+            placeholder="Donor username"
+            maxlength="60"
+          />
+          <input
+            type="number"
+            id="sim-amount"
+            placeholder="Amount ($)"
+            min="1"
+            max="99999"
+          />
+          <button class="sim-btn" id="sim-btn">Send Donation</button>
+        </div>
+        <p class="dev-note" id="dev-note"></p>
+      </div>
+    </div>
+
+  </div><!-- /admin-wrap -->
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

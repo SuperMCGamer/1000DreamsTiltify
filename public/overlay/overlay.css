@@ -1,0 +1,190 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   Friday the Herteenth – OBS Overlay Styles
+   Pink charity vibe with a subtle horror undertone.
+   Fixed at 500 × 250 px – exactly matches the OBS browser source size.
+────────────────────────────────────────────────────────────────────────────── */
+
+/* Reset & font */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 500px;
+  height: 250px;
+  overflow: hidden;
+  background: transparent;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ── Main container ──────────────────────────────────────────────────────────
+   Subtle bevel achieved with an inset box-shadow on the wrapper.
+   The jagged / stripe horror undertone is a repeating diagonal stripe in CSS.
+*/
+.overlay {
+  width: 500px;
+  height: 250px;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+
+  /* Pink gradient base */
+  background-color: #f0197d;
+
+  /* Diagonal stripe pattern – very subtle, slightly darker pink */
+  background-image: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 12px,
+    rgba(0, 0, 0, 0.06) 12px,
+    rgba(0, 0, 0, 0.06) 14px
+  );
+
+  /* Bevel / depth effect – inset only.
+     An outward drop-shadow is omitted because it paints outside the 250 px
+     body height and bleeds past the OBS browser source boundary (#7). */
+  box-shadow:
+    inset 0  3px  6px rgba(255, 255, 255, 0.35),
+    inset 0 -3px  6px rgba(0,   0,   0,   0.25);
+
+  /* Thin dark border gives a slight "etched" feel */
+  border: 2px solid rgba(90, 0, 40, 0.5);
+}
+
+/* ── Shared half-sections ────────────────────────────────────────────────────
+   Each half is exactly 125 px tall.
+*/
+.section {
+  width: 100%;
+  height: 125px;
+  position: relative;
+}
+
+/* Divider between top and bottom */
+.top-section {
+  border-bottom: 1px solid rgba(90, 0, 40, 0.4);
+}
+
+/* ── Normal content (logo + total) ───────────────────────────────────────── */
+.normal-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 0 14px;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.normal-content.fading { opacity: 0; }
+
+/* Logo area: fixed width so total text always has room */
+.logo-wrap {
+  flex: 0 0 90px;
+  height: 90px;
+  position: relative;
+}
+
+/* Crossfade container – images stack absolutely inside */
+.crossfade-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.cf-img {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.cf-img.cf-active { opacity: 1; }
+
+/* Bottom section crossfade box fills the full half */
+.bottom-section .crossfade-box {
+  width: 100%;
+  height: 100%;
+}
+
+.bottom-section .cf-img {
+  object-fit: cover; /* slides look better covering the area */
+  border-radius: 0;
+}
+
+/* Slides with slight inner padding */
+.bottom-section {
+  padding: 6px 10px;
+}
+
+.bottom-section .crossfade-box {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ── Donation total text ─────────────────────────────────────────────────── */
+.total-wrap {
+  flex: 1;
+}
+
+.total-text {
+  display: block;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  text-shadow:
+    0 1px 3px rgba(90, 0, 40, 0.7),
+    0 0  10px rgba(255, 80, 160, 0.5);
+  letter-spacing: -0.3px;
+}
+
+/* ── Alert panel ──────────────────────────────────────────────────────────── */
+.alert-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 16px;
+
+  /* Slightly darker pink with more saturation for urgency */
+  background: linear-gradient(135deg, #c8005a 0%, #e8006e 60%, #ff4da0 100%);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.alert-panel.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.alert-from {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.alert-name {
+  color: #fff;
+  font-weight: 800;
+}
+
+.alert-amount {
+  font-size: 38px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow:
+    0 2px 6px rgba(90, 0, 40, 0.6),
+    0 0  20px rgba(255, 150, 200, 0.6);
+  letter-spacing: -1px;
+  line-height: 1;
+}

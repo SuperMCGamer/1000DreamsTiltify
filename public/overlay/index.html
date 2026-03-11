@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=500" />
+  <title>Friday the Herteenth – Overlay</title>
+
+  <!-- Poppins ExtraBold from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="overlay.css" />
+</head>
+<body>
+
+  <!--
+    Outer wrapper is exactly 500×250 px so OBS crops it perfectly.
+    Top half (125 px) = logos + donation total, with alert panel layered on top.
+    Bottom half (125 px) = slideshow images.
+  -->
+  <div class="overlay">
+
+    <!-- ── TOP HALF ─────────────────────────────────────────────────────────── -->
+    <div class="section top-section">
+
+      <!-- Normal state: rotating logo + donation total -->
+      <div class="normal-content" id="normal-content">
+        <div class="logo-wrap">
+          <!-- Two images stacked; JS fades between them -->
+          <div class="crossfade-box" id="logo-box">
+            <!-- cf-active is NOT set here; overlay.js adds it after the first image loads (#6) -->
+            <img class="cf-img" id="logo-a" src="" alt="logo" />
+            <img class="cf-img" id="logo-b" src="" alt="logo" />
+          </div>
+        </div>
+
+        <div class="total-wrap">
+          <span class="total-text" id="total-text">$0 raised for 1,000 Dreams</span>
+        </div>
+      </div>
+
+      <!-- Alert state: slides over normal-content when a donation arrives -->
+      <div class="alert-panel" id="alert-panel">
+        <p class="alert-from">New donation from <span class="alert-name" id="alert-username"></span></p>
+        <p class="alert-amount" id="alert-amount">$0</p>
+      </div>
+
+    </div><!-- /top-section -->
+
+    <!-- ── BOTTOM HALF ───────────────────────────────────────────────────────── -->
+    <div class="section bottom-section">
+      <div class="crossfade-box" id="slide-box">
+        <!-- cf-active added by overlay.js after first load (#6) -->
+        <img class="cf-img" id="slide-a" src="" alt="slide" />
+        <img class="cf-img" id="slide-b" src="" alt="slide" />
+      </div>
+    </div><!-- /bottom-section -->
+
+  </div><!-- /overlay -->
+
+  <!-- Donation sound – add your own MP3 at /public/assets/donation.mp3 -->
+  <audio id="donation-sound" src="/assets/donation.mp3" preload="auto"></audio>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="overlay.js"></script>
+</body>
+</html>
