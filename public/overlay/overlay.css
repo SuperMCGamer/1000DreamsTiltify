@@ -76,11 +76,12 @@ body {
 
 .normal-content.fading { opacity: 0; }
 
-/* Logo area: fixed width so total text always has room */
+/* Logo area: equal half of the top section */
 .logo-wrap {
-  flex: 0 0 90px;
-  height: 90px;
+  flex: 1;
+  align-self: stretch;
   position: relative;
+  padding: 8px 6px 8px 10px;
 }
 
 /* Crossfade container – images stack absolutely inside */
@@ -126,18 +127,35 @@ body {
 /* ── Donation total text ─────────────────────────────────────────────────── */
 .total-wrap {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px 0 6px;
+  text-align: center;
 }
 
-.total-text {
+.total-amount {
   display: block;
-  font-size: 17px;
+  font-size: 30px;
   font-weight: 800;
   color: #fff;
-  line-height: 1.25;
+  line-height: 1.1;
   text-shadow:
-    0 1px 3px rgba(90, 0, 40, 0.7),
-    0 0  10px rgba(255, 80, 160, 0.5);
-  letter-spacing: -0.3px;
+    0 1px 4px rgba(90, 0, 40, 0.8),
+    0 0  14px rgba(255, 80, 160, 0.6);
+  letter-spacing: -1px;
+}
+
+.total-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 3px;
+  text-shadow: 0 1px 3px rgba(90, 0, 40, 0.6);
 }
 
 /* ── Alert panel ──────────────────────────────────────────────────────────── */

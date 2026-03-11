@@ -47,6 +47,18 @@
       <button class="dev-toggle-btn" id="advanced-btn">Advanced ▾</button>
 
       <div class="dev-panel" id="dev-panel">
+
+        <!-- Tiltify connection status -->
+        <h3 class="dev-title">Tiltify Status</h3>
+        <div class="tiltify-status-row">
+          <span class="status-dot" id="status-dot"></span>
+          <span class="status-text" id="status-text">Checking…</span>
+        </div>
+        <p class="status-campaign" id="status-campaign"></p>
+
+        <hr class="dev-divider" />
+
+        <!-- Simulate donation -->
         <h3 class="dev-title">Simulate Donation</h3>
         <div class="dev-fields">
           <input
@@ -65,6 +77,15 @@
           <button class="sim-btn" id="sim-btn">Send Donation</button>
         </div>
         <p class="dev-note" id="dev-note"></p>
+
+        <hr class="dev-divider" />
+
+        <!-- Reset simulated donations -->
+        <h3 class="dev-title">Reset</h3>
+        <p class="dev-note-sm">Removes all simulated donations and resets the total to real Tiltify donations only.</p>
+        <button class="reset-btn" id="reset-btn">Reset Simulated Donations</button>
+        <p class="dev-note" id="reset-note"></p>
+
       </div>
     </div>
 

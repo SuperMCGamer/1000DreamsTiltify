@@ -21,7 +21,7 @@ let alertPlaying = false;
 
 // ── DOM refs ───────────────────────────────────────────────────────────────────
 
-const totalText    = document.getElementById('total-text');
+const totalAmount  = document.getElementById('total-amount');
 const normalContent = document.getElementById('normal-content');
 const alertPanel   = document.getElementById('alert-panel');
 const alertUsername = document.getElementById('alert-username');
@@ -107,7 +107,7 @@ setInterval(advanceMedia, 8000);
 // ── Donation total ─────────────────────────────────────────────────────────────
 
 function setTotal(amount) {
-  totalText.textContent = `$${Math.round(amount)} raised for 1,000 Dreams`;
+  totalAmount.textContent = `$${Math.round(amount).toLocaleString('en-US')}`;
 }
 
 async function loadTotal() {

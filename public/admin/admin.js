@@ -139,19 +139,73 @@ socket.on('donation:read', ({ id, read }) => {
 
 socket.on('total:update', ({ total }) => setTotal(total));
 
+// ── Socket.io: donations reset ────────────────────────────────────────────────
+// Fired when the reset endpoint deletes simulated donations; clear the list
+// and re-fetch so all open admin tabs stay in sync.
+
+socket.on('donations:reset', () => {
+  donationsList.innerHTML = '';
+  renderedIds.clear();
+  const placeholder = document.createElement('p');
+  placeholder.className = 'empty-msg';
+  placeholder.id = 'empty-msg';
+  placeholder.textContent = 'Waiting for donations…';
+  donationsList.appendChild(placeholder);
+  loadDonations();
+});
+
 // ── Developer panel ────────────────────────────────────────────────────────────
 
-const advancedBtn = document.getElementById('advanced-btn');
-const devPanel    = document.getElementById('dev-panel');
-const simBtn      = document.getElementById('sim-btn');
-const simUsername = document.getElementById('sim-username');
-const simAmount   = document.getElementById('sim-amount');
-const devNote     = document.getElementById('dev-note');
+const advancedBtn  = document.getElementById('advanced-btn');
+const devPanel     = document.getElementById('dev-panel');
+const simBtn       = document.getElementById('sim-btn');
+const simUsername  = document.getElementById('sim-username');
+const simAmount    = document.getElementById('sim-amount');
+const devNote      = document.getElementById('dev-note');
+const resetBtn     = document.getElementById('reset-btn');
+const resetNote    = document.getElementById('reset-note');
+const statusDot    = document.getElementById('status-dot');
+const statusText   = document.getElementById('status-text');
+const statusCampaign = document.getElementById('status-campaign');
 
 advancedBtn.addEventListener('click', () => {
   const open = devPanel.classList.toggle('open');
   advancedBtn.textContent = open ? 'Advanced ▴' : 'Advanced ▾';
 });
+
+// ── Tiltify status polling ────────────────────────────────────────────────────
+
+async function pollStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const { tiltify } = await res.json();
+
+    if (!tiltify.configured) {
+      statusDot.className = 'status-dot dot-warn';
+      statusText.textContent = 'Not configured – add Tiltify env vars';
+      statusCampaign.textContent = '';
+    } else if (tiltify.connected) {
+      const ago = tiltify.lastPoll
+        ? Math.round((Date.now() - new Date(tiltify.lastPoll)) / 1000)
+        : null;
+      statusDot.className = 'status-dot dot-ok';
+      statusText.textContent = `Connected${ago !== null ? ` · polled ${ago}s ago` : ''}`;
+      statusCampaign.textContent = `Campaign ID: ${tiltify.campaignId}`;
+    } else {
+      statusDot.className = 'status-dot dot-err';
+      statusText.textContent = `Error: ${tiltify.lastError || 'unknown'}`;
+      statusCampaign.textContent = tiltify.campaignId ? `Campaign ID: ${tiltify.campaignId}` : '';
+    }
+  } catch {
+    statusDot.className = 'status-dot dot-err';
+    statusText.textContent = 'Cannot reach server';
+  }
+}
+
+pollStatus();
+setInterval(pollStatus, 5000);
+
+// ── Simulate donation ─────────────────────────────────────────────────────────
 
 simBtn.addEventListener('click', async () => {
   const username = simUsername.value.trim();
@@ -178,6 +232,25 @@ simBtn.addEventListener('click', async () => {
     devNote.textContent = `✗ Error: ${err.message}`;
   } finally {
     simBtn.disabled = false;
+  }
+});
+
+// ── Reset simulated donations ─────────────────────────────────────────────────
+
+resetBtn.addEventListener('click', async () => {
+  if (!confirm('Remove all simulated donations? Real Tiltify donations will be kept.')) return;
+
+  resetBtn.disabled = true;
+  resetNote.textContent = 'Resetting…';
+
+  try {
+    const res  = await fetch('/api/donations/reset', { method: 'POST' });
+    const data = await res.json();
+    resetNote.textContent = `✓ Removed ${data.deleted} simulated donation(s).`;
+  } catch (err) {
+    resetNote.textContent = `✗ Error: ${err.message}`;
+  } finally {
+    resetBtn.disabled = false;
   }
 });
 

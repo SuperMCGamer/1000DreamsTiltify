@@ -265,3 +265,66 @@ body {
   color: rgba(240, 224, 234, 0.45);
   min-height: 18px;
 }
+
+.dev-note-sm {
+  font-size: 12px;
+  color: rgba(240, 224, 234, 0.4);
+  margin-bottom: 10px;
+}
+
+.dev-divider {
+  border: none;
+  border-top: 1px solid rgba(240, 25, 125, 0.15);
+  margin: 18px 0;
+}
+
+/* ── Tiltify status indicator ─────────────────────────────────────────────── */
+.tiltify-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(240, 224, 234, 0.2);
+  box-shadow: 0 0 0 2px rgba(240, 224, 234, 0.1);
+}
+
+.status-dot.dot-ok   { background: #4ade80; box-shadow: 0 0 6px rgba(74, 222, 128, 0.6); }
+.status-dot.dot-warn { background: #facc15; box-shadow: 0 0 6px rgba(250, 204, 21, 0.6); }
+.status-dot.dot-err  { background: #f87171; box-shadow: 0 0 6px rgba(248, 113, 113, 0.6); }
+
+.status-text {
+  font-size: 13px;
+  color: rgba(240, 224, 234, 0.7);
+}
+
+.status-campaign {
+  font-size: 11px;
+  color: rgba(240, 224, 234, 0.35);
+  font-family: monospace;
+  margin-left: 18px;
+}
+
+/* ── Reset button ─────────────────────────────────────────────────────────── */
+.reset-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  border-radius: 6px;
+  color: #f87171;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.reset-btn:hover    { background: rgba(248, 113, 113, 0.1); border-color: #f87171; }
+.reset-btn:active   { background: rgba(248, 113, 113, 0.2); }
+.reset-btn:disabled { opacity: 0.4; cursor: not-allowed; }

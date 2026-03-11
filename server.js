@@ -132,6 +132,41 @@ app.patch('/api/donations/:id/read', (req, res) => {
   res.json({ ok: true });
 });
 
+// ── API: server / Tiltify status ───────────────────────────────────────────────
+
+app.get('/api/status', (_req, res) => {
+  const { TILTIFY_CLIENT_ID, TILTIFY_CLIENT_SECRET, TILTIFY_CAMPAIGN_ID } = process.env;
+  const configured = !!(TILTIFY_CLIENT_ID && TILTIFY_CLIENT_SECRET && TILTIFY_CAMPAIGN_ID);
+  res.json({
+    tiltify: {
+      configured,
+      connected:   tiltifyConnected,
+      campaignId:  TILTIFY_CAMPAIGN_ID || null,
+      lastPoll:    tiltifyLastPoll,
+      lastError:   tiltifyLastError,
+    },
+  });
+});
+
+// ── API: reset simulated donations ────────────────────────────────────────────
+// Deletes all donations where tiltify_id IS NULL (i.e. sent via the simulate
+// panel) and broadcasts a reset event so all open admin tabs refresh.
+
+app.post('/api/donations/reset', (_req, res) => {
+  const { changes } = db.prepare('DELETE FROM donations WHERE tiltify_id IS NULL').run();
+
+  // Rebuild revealedSet so it no longer contains IDs we just deleted.
+  revealedSet.clear();
+  db.prepare('SELECT id FROM donations WHERE revealed = 1').all()
+    .forEach(r => revealedSet.add(r.id));
+
+  io.emit('total:update', { total: getTotal() });
+  io.emit('donations:reset');
+
+  console.log(`[reset] Removed ${changes} simulated donation(s)`);
+  res.json({ ok: true, deleted: changes });
+});
+
 // ── API: simulate a donation (dev feature) ─────────────────────────────────────
 // Pushes a fake donation through the exact same queue as real ones.
 
@@ -231,9 +266,12 @@ if (orphaned.length > 0) {
 // Uses the Tiltify V5 API with OAuth2 client-credentials flow.
 // Polls every POLL_INTERVAL_MS milliseconds (default 10 s).
 
-let tiltifyToken   = null;
-let tokenExpiry    = 0;
-let pollInProgress = false; // guard against overlapping poll calls (#4)
+let tiltifyToken       = null;
+let tokenExpiry        = 0;
+let pollInProgress     = false; // guard against overlapping poll calls (#4)
+let tiltifyLastPoll    = null;  // ISO timestamp of last successful poll
+let tiltifyConnected   = false; // true after first successful poll
+let tiltifyLastError   = null;  // last error message, if any
 
 async function getTiltifyToken() {
   if (tiltifyToken && Date.now() < tokenExpiry) return tiltifyToken;
@@ -294,7 +332,13 @@ async function pollTiltify() {
       const username = donation.donor_name || 'Anonymous';
       queueDonation({ username, amount, tiltify_id: donation.id });
     }
+
+    tiltifyConnected = true;
+    tiltifyLastPoll  = new Date().toISOString();
+    tiltifyLastError = null;
   } catch (err) {
+    tiltifyConnected = false;
+    tiltifyLastError = err.message;
     console.error('[tiltify] poll error:', err.message);
   } finally {
     pollInProgress = false;
