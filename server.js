@@ -31,12 +31,18 @@ db.exec(`
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     username   TEXT    NOT NULL,
     amount     INTEGER NOT NULL,
+    comment    TEXT    NOT NULL DEFAULT '',
     tiltify_id TEXT    UNIQUE,
     revealed   INTEGER NOT NULL DEFAULT 0,
     read       INTEGER NOT NULL DEFAULT 0,
     created_at TEXT    NOT NULL DEFAULT (datetime('now'))
   )
 `);
+
+// Migration: add comment column to existing databases that predate this field.
+try {
+  db.exec("ALTER TABLE donations ADD COLUMN comment TEXT NOT NULL DEFAULT ''");
+} catch { /* column already exists – ignore */ }
 
 // On startup, load IDs of donations we've already revealed so we don't
 // double-reveal if the server restarts mid-stream.
@@ -171,7 +177,7 @@ app.post('/api/donations/reset', (_req, res) => {
 // Pushes a fake donation through the exact same queue as real ones.
 
 app.post('/api/donations/simulate', (req, res) => {
-  const { username, amount } = req.body;
+  const { username, amount, comment } = req.body;
   if (!username || amount == null) {
     return res.status(400).json({ error: 'username and amount are required' });
   }
@@ -179,7 +185,7 @@ app.post('/api/donations/simulate', (req, res) => {
   if (isNaN(rounded) || rounded <= 0) {
     return res.status(400).json({ error: 'amount must be a positive number' });
   }
-  queueDonation({ username, amount: rounded, tiltify_id: null });
+  queueDonation({ username, amount: rounded, comment: comment || '', tiltify_id: null });
   res.json({ ok: true });
 });
 
@@ -189,12 +195,12 @@ app.post('/api/donations/simulate', (req, res) => {
 // 2. Broadcasts a `donation:alert` event to all overlays.
 // 3. Broadcasts `total:update` so every overlay shows the new total immediately.
 
-function queueDonation({ username, amount, tiltify_id }) {
+function queueDonation({ username, amount, comment = '', tiltify_id }) {
   let donationId;
   try {
     const result = db
-      .prepare('INSERT INTO donations (username, amount, tiltify_id, revealed) VALUES (?, ?, ?, 0)')
-      .run(username, amount, tiltify_id || null);
+      .prepare('INSERT INTO donations (username, amount, comment, tiltify_id, revealed) VALUES (?, ?, ?, ?, 0)')
+      .run(username, amount, comment || '', tiltify_id || null);
     donationId = result.lastInsertRowid;
   } catch (err) {
     // UNIQUE constraint on tiltify_id – already processed, skip silently.
@@ -330,7 +336,8 @@ async function pollTiltify() {
       seenTiltifyIds.add(donation.id);
       const amount   = Math.round(parseFloat(donation.amount.value));
       const username = donation.donor_name || 'Anonymous';
-      queueDonation({ username, amount, tiltify_id: donation.id });
+      const comment  = donation.donor_comment || '';
+      queueDonation({ username, amount, comment, tiltify_id: donation.id });
     }
 
     tiltifyConnected = true;

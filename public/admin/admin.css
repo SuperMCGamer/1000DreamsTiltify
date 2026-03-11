@@ -102,7 +102,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 90px 120px 60px;
   gap: 8px;
-  align-items: center;
+  align-items: start;
   padding: 12px 16px;
   border-bottom: 1px solid rgba(240, 25, 125, 0.1);
   transition: opacity 0.4s ease, background 0.3s ease;
@@ -125,10 +125,27 @@ body {
   background: rgba(240, 25, 125, 0.07);
 }
 
+.donor-name-wrap {
+  min-width: 0; /* allow text-overflow to work inside a grid cell */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .donor-name {
   font-weight: 700;
   font-size: 15px;
   color: #f0e0ea;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.donor-comment {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(240, 224, 234, 0.5);
+  font-style: italic;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -241,6 +258,22 @@ body {
 
 .dev-fields input::placeholder { color: rgba(240, 224, 234, 0.3); }
 .dev-fields input:focus { border-color: rgba(240, 25, 125, 0.7); }
+
+.sim-comment-input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(240, 25, 125, 0.3);
+  border-radius: 6px;
+  color: #f0e0ea;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.sim-comment-input::placeholder { color: rgba(240, 224, 234, 0.3); }
+.sim-comment-input:focus { border-color: rgba(240, 25, 125, 0.7); }
 
 .sim-btn {
   padding: 9px 18px;

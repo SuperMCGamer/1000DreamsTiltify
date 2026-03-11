@@ -48,8 +48,11 @@ function buildRow(donation) {
   row.dataset.id = donation.id;
 
   row.innerHTML = `
-    <span class="donor-name">${esc(donation.username)}</span>
-    <span class="donor-amount">$${Math.round(donation.amount)}</span>
+    <div class="donor-name-wrap">
+      <span class="donor-name">${esc(donation.username)}</span>
+      ${donation.comment ? `<span class="donor-comment">${esc(donation.comment)}</span>` : ''}
+    </div>
+    <span class="donor-amount">$${Math.round(donation.amount).toLocaleString('en-US')}</span>
     <span class="donor-time">${formatTime(donation.created_at)}</span>
     <label class="read-label read-cell">
       <input
@@ -161,6 +164,7 @@ const devPanel     = document.getElementById('dev-panel');
 const simBtn       = document.getElementById('sim-btn');
 const simUsername  = document.getElementById('sim-username');
 const simAmount    = document.getElementById('sim-amount');
+const simComment   = document.getElementById('sim-comment');
 const devNote      = document.getElementById('dev-note');
 const resetBtn     = document.getElementById('reset-btn');
 const resetNote    = document.getElementById('reset-note');
@@ -217,17 +221,20 @@ simBtn.addEventListener('click', async () => {
   simBtn.disabled = true;
   devNote.textContent = 'Sending…';
 
+  const comment = simComment.value.trim();
+
   try {
     const res = await fetch('/api/donations/simulate', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ username, amount }),
+      body:    JSON.stringify({ username, amount, comment }),
     });
     if (!res.ok) throw new Error(await res.text());
 
     devNote.textContent = `✓ Queued "$${Math.round(amount)}" from "${username}" – alert playing on overlay.`;
     simUsername.value = '';
     simAmount.value   = '';
+    simComment.value  = '';
   } catch (err) {
     devNote.textContent = `✗ Error: ${err.message}`;
   } finally {
