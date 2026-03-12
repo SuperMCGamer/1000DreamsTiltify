@@ -25,7 +25,10 @@
     </header>
 
     <!-- Live donations list – newest at the top -->
-    <section class="donations-section">
+    <section class="donations-section" id="donations-section">
+      <div class="donations-controls">
+        <button class="hide-read-btn" id="hide-read-btn">Hide read</button>
+      </div>
       <div class="donations-header">
         <span>Donor</span>
         <span>Amount</span>
@@ -36,6 +39,12 @@
       <div id="donations-list">
         <!-- Rows are injected by admin.js -->
         <p class="empty-msg" id="empty-msg">Waiting for donations…</p>
+      </div>
+
+      <div class="pagination" id="pagination" style="display:none">
+        <button class="page-btn" id="prev-btn" disabled>← Prev</button>
+        <span class="page-info" id="page-info">Page 1 of 1</span>
+        <button class="page-btn" id="next-btn" disabled>Next →</button>
       </div>
     </section>
 

@@ -12,13 +12,42 @@ const socket = io();
 
 // ── DOM refs ───────────────────────────────────────────────────────────────────
 
-const donationsList = document.getElementById('donations-list');
-const emptyMsg      = document.getElementById('empty-msg');
-const adminTotal    = document.getElementById('admin-total');
+const donationsList   = document.getElementById('donations-list');
+const donationsSection = document.getElementById('donations-section');
+const adminTotal      = document.getElementById('admin-total');
+const hideReadBtn     = document.getElementById('hide-read-btn');
+const paginationEl    = document.getElementById('pagination');
+const prevBtn         = document.getElementById('prev-btn');
+const nextBtn         = document.getElementById('next-btn');
+const pageInfo        = document.getElementById('page-info');
 
 // Tracks IDs already rendered so the HTTP load and a concurrent socket event
 // for the same donation don't produce duplicate rows (#3).
 const renderedIds = new Set();
+
+// ── Pagination state ───────────────────────────────────────────────────────────
+
+const PAGE_SIZE  = 50;
+let currentPage  = 1;
+let totalPages   = 1;
+
+// ── Hide-read toggle (persisted per browser via localStorage) ─────────────────
+
+let hideRead = localStorage.getItem('hideRead') === 'true';
+
+function applyHideRead() {
+  donationsSection.classList.toggle('hide-read', hideRead);
+  hideReadBtn.classList.toggle('active', hideRead);
+  hideReadBtn.textContent = hideRead ? 'Show read' : 'Hide read';
+}
+
+hideReadBtn.addEventListener('click', () => {
+  hideRead = !hideRead;
+  localStorage.setItem('hideRead', hideRead);
+  applyHideRead();
+});
+
+applyHideRead();
 
 // ── Utility: escape HTML so donor names can't inject markup ───────────────────
 
@@ -77,41 +106,70 @@ function buildRow(donation) {
   return row;
 }
 
-// ── Prepend a row (newest at top) ─────────────────────────────────────────────
+// ── Prepend a row (live socket events – always at top of current view) ────────
 
 function prependRow(donation) {
-  // Guard against the HTTP-load / socket-event race that can deliver the same
-  // donation twice during the initial page load window (#3).
+  // Guard against HTTP-load / socket-event race (#3).
   if (renderedIds.has(donation.id)) return;
   renderedIds.add(donation.id);
 
-  // Remove "waiting" placeholder when the first row arrives.
+  // New live donations only prepend when viewing page 1.
+  // On deeper pages the row will appear when the user navigates back to page 1.
+  if (currentPage !== 1) return;
+
   const placeholder = document.getElementById('empty-msg');
   if (placeholder) placeholder.remove();
 
-  const row = buildRow(donation);
-  donationsList.insertBefore(row, donationsList.firstChild);
+  donationsList.insertBefore(buildRow(donation), donationsList.firstChild);
 }
 
 // ── Update total display ───────────────────────────────────────────────────────
 
 function setTotal(amount) {
-  adminTotal.textContent = `$${Math.round(amount)}`;
+  adminTotal.textContent = `$${Math.round(amount).toLocaleString('en-US')}`;
 }
 
-// ── Load existing donations on page load ──────────────────────────────────────
+// ── Pagination controls ────────────────────────────────────────────────────────
 
-async function loadDonations() {
+function updatePagination() {
+  paginationEl.style.display = totalPages > 1 ? 'flex' : 'none';
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = currentPage >= totalPages;
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+}
+
+prevBtn.addEventListener('click', () => { if (currentPage > 1)           loadPage(currentPage - 1); });
+nextBtn.addEventListener('click', () => { if (currentPage < totalPages)  loadPage(currentPage + 1); });
+
+// ── Load a page of donations from the server ───────────────────────────────────
+
+async function loadPage(page = 1) {
   try {
     const [donRes, totRes] = await Promise.all([
-      fetch('/api/donations'),
+      fetch(`/api/donations?page=${page}&limit=${PAGE_SIZE}`),
       fetch('/api/total'),
     ]);
-    const donations = await donRes.json();
+    const { donations, pages } = await donRes.json();
     const { total } = await totRes.json();
 
-    // Already sorted newest-first by the server.
-    for (const d of donations) prependRow(d);
+    donationsList.innerHTML = '';
+    renderedIds.clear();
+    currentPage = page;
+    totalPages  = pages;
+    updatePagination();
+
+    if (donations.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'empty-msg';
+      p.id = 'empty-msg';
+      p.textContent = 'Waiting for donations…';
+      donationsList.appendChild(p);
+    } else {
+      for (const d of donations) {
+        renderedIds.add(d.id);
+        donationsList.appendChild(buildRow(d));
+      }
+    }
 
     setTotal(total);
   } catch (err) {
@@ -147,14 +205,7 @@ socket.on('total:update', ({ total }) => setTotal(total));
 // and re-fetch so all open admin tabs stay in sync.
 
 socket.on('donations:reset', () => {
-  donationsList.innerHTML = '';
-  renderedIds.clear();
-  const placeholder = document.createElement('p');
-  placeholder.className = 'empty-msg';
-  placeholder.id = 'empty-msg';
-  placeholder.textContent = 'Waiting for donations…';
-  donationsList.appendChild(placeholder);
-  loadDonations();
+  loadPage(1);
 });
 
 // ── Developer panel ────────────────────────────────────────────────────────────
@@ -263,4 +314,4 @@ resetBtn.addEventListener('click', async () => {
 
 // ── Init ───────────────────────────────────────────────────────────────────────
 
-loadDonations();
+loadPage(1);

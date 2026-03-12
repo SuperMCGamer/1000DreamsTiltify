@@ -120,11 +120,19 @@ app.get('/api/total', (_req, res) => {
 // ── API: revealed donations for admin page ─────────────────────────────────────
 // Only donations whose alerts have already played are visible to admins.
 
-app.get('/api/donations', (_req, res) => {
+app.get('/api/donations', (req, res) => {
+  const limit  = Math.min(100, Math.max(1, parseInt(req.query.limit,  10) || 50));
+  const page   = Math.max(1,              parseInt(req.query.page,    10) || 1);
+  const offset = (page - 1) * limit;
+
+  const { count } = db
+    .prepare('SELECT COUNT(*) AS count FROM donations WHERE revealed = 1')
+    .get();
   const donations = db
-    .prepare('SELECT * FROM donations WHERE revealed = 1 ORDER BY id DESC')
-    .all();
-  res.json(donations);
+    .prepare('SELECT * FROM donations WHERE revealed = 1 ORDER BY id DESC LIMIT ? OFFSET ?')
+    .all(limit, offset);
+
+  res.json({ donations, count, page, pages: Math.max(1, Math.ceil(count / limit)) });
 });
 
 // ── API: mark a donation read/unread ──────────────────────────────────────────

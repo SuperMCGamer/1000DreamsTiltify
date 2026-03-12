@@ -97,6 +97,67 @@ body {
   color: rgba(240, 224, 234, 0.6);
 }
 
+/* ── Controls bar (hide-read toggle) ────────────────────────────────────────── */
+.donations-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 4px;
+  border-bottom: 1px solid rgba(240, 25, 125, 0.08);
+}
+
+.hide-read-btn {
+  background: none;
+  border: 1px solid rgba(240, 25, 125, 0.3);
+  border-radius: 5px;
+  color: rgba(240, 224, 234, 0.5);
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.hide-read-btn:hover      { color: rgba(240, 224, 234, 0.85); border-color: rgba(240, 25, 125, 0.6); }
+.hide-read-btn.active     { background: rgba(240, 25, 125, 0.15); border-color: #f0197d; color: #ff6ec7; }
+
+/* When active, hide all is-read rows via CSS only (no JS loop needed) */
+.donations-section.hide-read .donation-row.is-read { display: none; }
+
+/* ── Pagination ───────────────────────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-top: 1px solid rgba(240, 25, 125, 0.1);
+}
+
+.page-btn {
+  background: none;
+  border: 1px solid rgba(240, 25, 125, 0.35);
+  border-radius: 6px;
+  color: rgba(240, 224, 234, 0.6);
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.page-btn:hover:not(:disabled) { color: #f0e0ea; border-color: #f0197d; background: rgba(240, 25, 125, 0.1); }
+.page-btn:disabled { opacity: 0.3; cursor: default; }
+
+.page-info {
+  font-size: 12px;
+  color: rgba(240, 224, 234, 0.45);
+  min-width: 90px;
+  text-align: center;
+}
+
 /* ── Donation row ────────────────────────────────────────────────────────────── */
 .donation-row {
   display: grid;
