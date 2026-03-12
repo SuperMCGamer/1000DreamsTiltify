@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Friday the Herteenth – Animated Background</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       width: 1920px;
@@ -14,9 +14,38 @@
     }
 
     .bg {
+      position: relative;
       width: 1920px;
       height: 1080px;
-      background-color: #1a0010;
+      overflow: hidden;
+      background: #1a0010;
+    }
+
+    /*
+      The stripe layer is a pseudo-element that extends 50px past every edge so
+      the viewport never sees a gap during the translate.
+
+      WHY TRANSFORM INSTEAD OF background-position:
+        background-position accumulates a floating-point rounding error on every
+        loop, which manifests as a visible stripe jump. transform: translate() is
+        composited on the GPU and snaps cleanly to the exact pixel, so the seam
+        is invisible.
+
+      WHY (15.79px, 15.79px):
+        The -55deg gradient direction unit vector in screen coords is
+        (-sin 55°, -cos 55°) = (-0.8192, -0.5736).
+        For a shift (s, s) the projection onto that axis is
+        s × (0.8192 + 0.5736) = s × 1.3928.
+        Setting that equal to one stripe period (22px):
+          s = 22 / 1.3928 ≈ 15.79px
+        So translating the element by (15.79, 15.79) moves it exactly one
+        stripe-period in the gradient direction → pattern looks identical
+        before and after the loop, making the seam invisible.
+    */
+    .bg::before {
+      content: '';
+      position: absolute;
+      inset: -50px;
       background-image: repeating-linear-gradient(
         -55deg,
         transparent,
@@ -24,19 +53,13 @@
         rgba(240, 25, 125, 0.04) 20px,
         rgba(240, 25, 125, 0.04) 22px
       );
-      animation: drift 20s linear infinite;
+      will-change: transform;
+      animation: drift 10s linear infinite;
     }
 
-    /*
-      Animate background-position by exactly one stripe period in each axis so
-      the loop is seamless:
-        x-period = 22px / sin(55°) ≈ 26.86px → 27px
-        y-period = 22px / cos(55°) ≈ 38.33px → 38px
-      The ~0.2px rounding error is invisible at this speed.
-    */
     @keyframes drift {
-      from { background-position: 0px   0px; }
-      to   { background-position: 27px 38px; }
+      from { transform: translate(0px,     0px); }
+      to   { transform: translate(15.79px, 15.79px); }
     }
   </style>
 </head>
