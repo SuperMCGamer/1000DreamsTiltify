@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Friday the Herteenth – Animated Background</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .bg {
+      width: 1920px;
+      height: 1080px;
+      background-color: #1a0010;
+      background-image: repeating-linear-gradient(
+        -55deg,
+        transparent,
+        transparent 20px,
+        rgba(240, 25, 125, 0.04) 20px,
+        rgba(240, 25, 125, 0.04) 22px
+      );
+      animation: drift 20s linear infinite;
+    }
+
+    /*
+      Animate background-position by exactly one stripe period in each axis so
+      the loop is seamless:
+        x-period = 22px / sin(55°) ≈ 26.86px → 27px
+        y-period = 22px / cos(55°) ≈ 38.33px → 38px
+      The ~0.2px rounding error is invisible at this speed.
+    */
+    @keyframes drift {
+      from { background-position: 0px   0px; }
+      to   { background-position: 27px 38px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+</body>
+</html>
